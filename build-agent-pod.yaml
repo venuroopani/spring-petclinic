@@ -9,9 +9,9 @@ spec:
       resources:  # limits the resources your build contaienr
         requests:
           memory: "512Mi"
-          cpu: "500m"
+          cpu: "300m"
         limits:
-          memory: "712Mi"
+          memory: "612Mi"
     - name: docker
       image: docker:18.06.1
       command: ["tail", "-f", "/dev/null"]
