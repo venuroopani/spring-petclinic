@@ -1,11 +1,4 @@
-FROM alpine/git as clone
-WORKDIR /app
-RUN git clone https://github.com/mitesh51/spring-petclinic
-
-FROM maven:3.6.3-jdk-8 as build
-WORKDIR /app
-COPY --from=clone /app/spring-petclinic /app
-RUN mvn dependency:go-offline
-#RUN mvn package
-
-
+FROM tomcat:8.0
+MAINTAINER MS
+# COPY path-to-your-application-war path-to-webapps-in-docker-tomcat
+COPY target/petclinic.war /usr/local/tomcat/webapps/
