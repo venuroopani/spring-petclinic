@@ -42,7 +42,11 @@ pipeline {
 		stage('Docker Image') {
 			steps {
 				container('docker') { 
-					sh 'docker image build -t ms/petclinic .'
+					sh 'docker image build -t mitesh51/petclinic:0.1 .'
+					withCredentials([usernamePassword(credentialsId: 'docker-login', passwordVariable: 'password', usernameVariable: 'uname')]) {
+					    sh 'docker login -u=$uname -p=$password'
+                    }
+					sh 'docker push mitesh51/petclinic:0.1'
 				}
 			}
 		}
