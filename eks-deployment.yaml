@@ -12,6 +12,7 @@ spec:
      labels:
         app: petclinic
     spec:
+     serviceAccountName: jenkins
      containers:
         - name: petclinic
           image: mitesh51/petclinic:0.1 
