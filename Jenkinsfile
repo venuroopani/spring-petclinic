@@ -10,46 +10,6 @@ pipeline {
 	}  
   
 	stages {
-		stage('UnitTests & Coverage') {
-			steps {
-				// Execute Batch script if OS flavor is Windows		
-				sh 'mvn cobertura:cobertura'
-				// Publish JUnit Report
-				junit '**/target/surefire-reports/TEST-*.xml'
-				cobertura autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/target/site/cobertura/*.xml', conditionalCoverageTargets: '70, 0, 0', failUnhealthy: false, failUnstable: false, lineCoverageTargets: '80, 0, 0', maxNumberOfBuilds: 0, methodCoverageTargets: '80, 0, 0', onlyStable: false, sourceEncoding: 'ASCII'
-			}		
-		}
-		stage('Static Code Analysis') {
-
-			steps {
-
-				sh 'wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-3.3.0.1492-linux.zip'
-				sh 'unzip sonar-scanner-cli-3.3.0.1492-linux.zip'
-				withSonarQubeEnv(installationName: 'SonarQube', credentialsId: 'SonarToken') {
-				  sh 'ls -l'
-				  sh 'sonar-scanner-3.3.0.1492-linux/bin/sonar-scanner -Dsonar.projectVersion=1.0 -Dsonar.projectKey=sample-springboot-app -Dsonar.java.binaries=. -Dsonar.sources=src/test,src/main/java/org/springframework/samples/petclinic,src/main/webapp/resources,src/main/webapp/WEB-INF/jsp,src/main/webapp/WEB-INF/tags'
-				}
-				waitForQualityGate(abortPipeline: true, credentialsId: 'SonarToken')
-			}
-		}
-    
-		stage('Build') {
-			steps {
-				sh 'mvn clean package -Dmaven.test.skip=true'
-				archiveArtifacts(artifacts: '**/*.war', onlyIfSuccessful: true, fingerprint: true)
-			}
-		}
-		stage('Docker Image') {
-			steps {
-				container('docker') { 
-					sh 'docker image build -t mitesh51/petclinic:0.1 .'
-					withCredentials([usernamePassword(credentialsId: 'docker-login', passwordVariable: 'password', usernameVariable: 'uname')]) {
-					    sh 'docker login -u=$uname -p=$password'
-                    }
-					sh 'docker push mitesh51/petclinic:0.1'
-				}
-			}
-		}
  		stage('EKS-Deployment') {
 			steps {
 				kubernetesDeploy configs: 'eks-deployment.yaml', kubeConfig: [path: ''], kubeconfigId: 'eks-kubeconfig', secretName: '', ssh: [sshCredentialsId: '*', sshServer: ''], textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://']
